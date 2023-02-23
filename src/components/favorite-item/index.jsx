@@ -2,7 +2,7 @@ import React from "react";
 import "./styles.css";
 
 export default function FavoriteItem(props) {
-  const { id, image, title } = props;
+  const { id, image, title, removeFromFavorites } = props;
 
   console.log(props, "recipeitemprop");
   return (
@@ -11,7 +11,9 @@ export default function FavoriteItem(props) {
         <img src={image} alt="recipe"></img>
       </div>
       <p>{title}</p>
-      <button type="button">Remove from favorites</button>
+      <button type="button" onClick={removeFromFavorites}>
+        Remove from favorites
+      </button>
     </div>
   );
 }

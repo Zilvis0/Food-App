@@ -1,8 +1,25 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useReducer, useState } from "react";
 import FavoriteItem from "../../components/favorite-item";
 import RecipeItem from "../../components/recipe-item";
 import Search from "../../components/search";
 import "./styles.css";
+
+const reducer = (state, action) => {
+  switch (action.type) {
+    case "filterFavorites":
+      return {
+        ...state,
+        filteredState: action.value,
+      };
+
+    default:
+      return state;
+  }
+};
+
+const initialState = {
+  filteredValue: "",
+};
 
 export default function Homepage() {
   //loading state
@@ -16,6 +33,14 @@ export default function Homepage() {
   //favorites data sate
 
   const [favorites, setFavorites] = useState([]);
+
+  //state for api successfull or not
+
+  const [apiCalledSuccess, setApiCalledSuccess] = useState(false);
+
+  //useReducer functionality
+
+  const [filteredState, dispatch] = useReducer(reducer, initialState);
 
   const getDataFromSearchComponent = (getData) => {
     //keep loading state as true before we are calling the API
@@ -32,6 +57,7 @@ export default function Homepage() {
       if (results && results.length > 0) {
         setLoadingState(false);
         setRecipes(results);
+        setApiCalledSuccess(true);
       }
 
       console.log(result);
@@ -58,25 +84,54 @@ export default function Homepage() {
     }
   };
 
+  const removeFromFavorites = (getCurrentId) => {
+    let copyFavorites = [...favorites];
+    copyFavorites = copyFavorites.filter((item) => item.id !== getCurrentId);
+    setFavorites(copyFavorites);
+    localStorage.setItem("favorites", JSON.stringify(copyFavorites));
+  };
+
   useEffect(() => {
     const extractFavoritesFromLocalStorageOnPageLoad = JSON.parse(
       localStorage.getItem("favorites")
     );
-    setFavorites(extractFavoritesFromLocalStorageOnPageLoad);
+    setFavorites(extractFavoritesFromLocalStorageOnPageLoad || []);
   }, []);
+
+  // filter favorites
+
+  const filteredFavoriteItems = favorites.filter((item) =>
+    item.title.toLowerCase().includes(filteredState.filteredValue)
+  );
 
   return (
     <div className="Homepage">
-      <Search getDataFromSearchComponent={getDataFromSearchComponent} />
+      <Search
+        getDataFromSearchComponent={getDataFromSearchComponent}
+        apiCalledSuccess={apiCalledSuccess}
+        setApiCalledSuccess={setApiCalledSuccess}
+      />
 
       {/*show favorite items*/}
 
       <div className="favorites-wrapper">
         <h1 className="favorites-title">Favorites</h1>
+
+        <div className="search-favorites">
+          <input
+            onChange={(event) =>
+              dispatch({ type: "filterFavorites", value: event.target.value })
+            }
+            name="searchfavorites"
+            placeholder="Search favorites"
+            value={filteredState.filteredValue}
+          />
+        </div>
         <div className="favorites">
-          {favorites && favorites.length > 0
-            ? favorites.map((item) => (
+          {filteredFavoriteItems && filteredFavoriteItems.length > 0
+            ? filteredFavoriteItems.map((item) => (
                 <FavoriteItem
+                  removeFromFavorites={() => removeFromFavorites(item.id)}
                   id={item.id}
                   title={item.title}
                   image={item.image}

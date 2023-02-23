@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./styles.css";
 
 export default function Search(props) {
-  const { getDataFromSearchComponent } = props;
+  const { getDataFromSearchComponent, apiCalledSuccess, setApiCalledSuccess } =
+    props;
   const [inputValue, setInputValue] = useState("");
 
   const handleInputValue = (event) => {
@@ -14,6 +15,13 @@ export default function Search(props) {
     event.preventDefault();
     getDataFromSearchComponent(inputValue);
   };
+
+  useEffect(() => {
+    if (apiCalledSuccess) {
+      setInputValue("");
+      setApiCalledSuccess(false);
+    }
+  }, [apiCalledSuccess, setApiCalledSuccess]);
 
   return (
     <form onSubmit={handleSubmit} className="Search">
