@@ -1,17 +1,22 @@
-import React from "react";
+import React, { useContext } from "react";
+import { ThemeContext } from "../../App";
 import "./styles.css";
 
 export default function RecipeItem(props) {
   const { id, image, title, addToFavorites } = props;
+  const { theme } = useContext(ThemeContext);
 
-  console.log(props, "recipeitemprop");
   return (
     <div key={id} className="recipe-item">
       <div>
         <img src={image} alt="recipe"></img>
       </div>
-      <p>{title}</p>
-      <button type="button" onClick={addToFavorites}>
+      <p style={theme ? { color: "#12343b" } : {}}>{title}</p>
+      <button
+        style={theme ? { backgroundColor: "#12343b" } : {}}
+        type="button"
+        onClick={addToFavorites}
+      >
         Add to favorites
       </button>
     </div>

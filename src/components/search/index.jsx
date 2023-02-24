@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
+import { ThemeContext } from "../../App";
 import "./styles.css";
 
 export default function Search(props) {
@@ -23,6 +24,8 @@ export default function Search(props) {
     }
   }, [apiCalledSuccess, setApiCalledSuccess]);
 
+  const { theme } = useContext(ThemeContext);
+
   return (
     <form onSubmit={handleSubmit} className="Search">
       <input
@@ -32,7 +35,9 @@ export default function Search(props) {
         value={inputValue}
         onChange={handleInputValue}
       />
-      <button type="submit">Search</button>
+      <button style={theme ? { backgroundColor: "#12343b" } : {}} type="submit">
+        Search
+      </button>
     </form>
   );
 }

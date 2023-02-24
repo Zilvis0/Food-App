@@ -1,4 +1,5 @@
-import React, { useEffect, useReducer, useState } from "react";
+import React, { useContext, useEffect, useReducer, useState } from "react";
+import { ThemeContext } from "../../App";
 import FavoriteItem from "../../components/favorite-item";
 import RecipeItem from "../../components/recipe-item";
 import Search from "../../components/search";
@@ -9,7 +10,7 @@ const reducer = (state, action) => {
     case "filterFavorites":
       return {
         ...state,
-        filteredState: action.value,
+        filteredValue: action.value,
       };
 
     default:
@@ -42,10 +43,11 @@ export default function Homepage() {
 
   const [filteredState, dispatch] = useReducer(reducer, initialState);
 
+  const { theme } = useContext(ThemeContext);
+
   const getDataFromSearchComponent = (getData) => {
     //keep loading state as true before we are calling the API
     setLoadingState(true);
-    console.log(getData, "getData");
     //calling API
     async function getRecipes() {
       const apiResponse = await fetch(
@@ -59,13 +61,9 @@ export default function Homepage() {
         setRecipes(results);
         setApiCalledSuccess(true);
       }
-
-      console.log(result);
     }
     getRecipes();
   };
-
-  console.log(loadingState, recipes, "loadingState, recipes");
 
   const addToFavorites = (getCurrentRecipeItem) => {
     let copyFavorites = [...favorites];
@@ -73,12 +71,13 @@ export default function Homepage() {
     const index = copyFavorites.findIndex(
       (item) => item.id === getCurrentRecipeItem.id
     );
-    console.log(index);
+
     if (index === -1) {
       copyFavorites.push(getCurrentRecipeItem);
       setFavorites(copyFavorites);
       //save the favoriters in local storage
       localStorage.setItem("favorites", JSON.stringify(copyFavorites));
+      window.scrollTo({ top: "0", behavior: "smooth" });
     } else {
       alert("Item already in favorites!");
     }
@@ -115,7 +114,12 @@ export default function Homepage() {
       {/*show favorite items*/}
 
       <div className="favorites-wrapper">
-        <h1 className="favorites-title">Favorites</h1>
+        <h1
+          style={theme ? { color: "#12343b" } : {}}
+          className="favorites-title"
+        >
+          Favorites
+        </h1>
 
         <div className="search-favorites">
           <input
@@ -128,6 +132,9 @@ export default function Homepage() {
           />
         </div>
         <div className="favorites">
+          {!filteredFavoriteItems.length && (
+            <div className="no-items">No Favorites are found</div>
+          )}
           {filteredFavoriteItems && filteredFavoriteItems.length > 0
             ? filteredFavoriteItems.map((item) => (
                 <FavoriteItem
@@ -135,6 +142,7 @@ export default function Homepage() {
                   id={item.id}
                   title={item.title}
                   image={item.image}
+                  key={item.id}
                 />
               ))
             : null}
@@ -158,11 +166,16 @@ export default function Homepage() {
                 id={item.id}
                 title={item.title}
                 image={item.image}
+                key={item.id}
               />
             ))
           : null}
       </div>
       {/*map through recipes*/}
+
+      {!loadingState && !recipes.length && (
+        <div className="no-items">No Recipes are found</div>
+      )}
     </div>
   );
 }
